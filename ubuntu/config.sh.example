@@ -1,0 +1,22 @@
+# config.sh.example
+#
+# Example configuration for the ubuntu/ helper scripts.
+#
+# The active file is config.sh, which bin/configstrap.sh creates from this
+# file when config.sh is missing:
+#     bin/configstrap.sh            # generate config.sh from this example
+#
+# Edit the values below, then regenerate config.sh.
+# NOTE: this file is committed to git; config.sh is NOT (see .gitignore).
+
+
+APT_PROXY="http://192.168.1.2:3142"
+
+DEFAULT_PROXY=
+
+# --- Public SSH keys (~/.ssh/authorized_keys) ---------------------------------
+# Multi-line public key lines. addkey.sh appends SSHKEYS to
+# $HOME/.ssh/authorized_keys. Replace the placeholder keys with your own.
+# single key per line
+SSHKEYS="
+"

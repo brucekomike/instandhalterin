@@ -1,0 +1,2 @@
+# Ignore host lists (may contain sensitive hostnames); keep this file
+*.txt
