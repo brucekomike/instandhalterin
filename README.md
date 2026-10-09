@@ -21,13 +21,14 @@ ubuntu/
 │   ├── riexec.sh         # open an interactive ssh session to one host
 │   └── test_tui.sh       # verify dialog/ncurses works on a remote host
 ├── rscripts/             # remote payloads (executed on the remote host)
-│   ├── proxy.bash        # set apt + bashrc proxy
-│   ├── apt.bash          # apt-get update + upgrade
-│   ├── snapstrap.bash    # set snap proxy
-│   ├── k8strap.bash      # install the k8s snap through the local proxy
-│   ├── addkey.bash       # append $PASSVAR to remote authorized_keys
-│   ├── dialog.bash       # dialog connection test
-│   └── reboot.bash       # reboot the remote host
+│   ├── apt-proxy.bash     # write the apt proxy config
+│   ├── pkg.bash           # apt-get update + upgrade + autoremove
+│   ├── snapstrap.bash     # set snap proxy
+│   ├── k8strap.bash       # install the k8s snap through the local proxy
+│   ├── addkey.bash        # append $SSHKEYS to the operator's authorized_keys
+│   ├── om-user.bash       # create $MAINT_USER with sudo + its own keys
+│   ├── dialog.bash        # dialog connection test
+│   └── reboot.bash        # reboot the remote host
 ├── rcommands/            # one-off remote commands (no env setup)
 │   └── k8strap.bash      # plain `snap install k8s --classic`
 └── rhosts/               # host lists, one hostname per line (# comments ok)
@@ -77,12 +78,15 @@ bin/rexec.sh rhosts/list1.txt rscripts/k8strap.bash
 # Distribute your SSH key to every worker
 bin/rexec.sh rhosts/list1.txt rscripts/addkey.bash
 
+# Create the sudo maintenance user on every worker (idempotent)
+bin/rexec.sh rhosts/list1.txt rscripts/om-user.bash
+
 # Reboot after strapping
 bin/rexec.sh rhosts/list1.txt rscripts/reboot.bash
 ```
 
 Typical fresh-host bring-up order: proxy → apt → snapstrap → k8strap →
-addkey → reboot.
+addkey → om-user → reboot.
 
 ## Interactive helpers
 
@@ -99,6 +103,13 @@ bin/test_tui.sh <host>                    # dialog/ncurses smoke test on remote
 | `SNAP_PROXY_IP` / `SNAP_PROXY_PORT`       | `rscripts/snapstrap.bash` (local snap proxy) |
 | `K8S_PROXY_IP` / `K8S_PROXY_PORT`         | `rscripts/k8strap.bash` (local proxy for the snap install) |
 | `SSHKEYS`                 | `bin/addkey.sh` (local) and `rscripts/addkey.bash` (remote) |
+| `MAINT_USER`              | `rscripts/om-user.bash` (user to create; default `maintainer`) |
+| `MAINT_SSHKEYS`           | `rscripts/om-user.bash` (keys for that user; falls back to `SSHKEYS`) |
+
+Only the variables listed in `bin/rexec.sh`'s allowlist (`APT_PROXY`,
+`DEFAULT_PROXY`, `SSHKEYS`, `MAINT_USER`, `MAINT_SSHKEYS`) are exported to the
+remote shell — when an rscript reads a new `config.sh` variable, add it there
+too, otherwise it arrives empty.
 
 `config.sh` is generated from `config.sh.example` by `bin/configstrap.sh`
 and is git-ignored; keep secrets out of the example.

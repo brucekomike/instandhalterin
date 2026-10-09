@@ -23,8 +23,10 @@ command_file="${2:?usage: rexec.sh <host|host-list-file> <command-file>}"
 
 # Build the remote environment prefix, quoting each value for the remote shell.
 # Variables that are missing or empty in config.sh are skipped.
+# NOTE: a config.sh variable is invisible to an rscript unless it is listed
+# here, so add every new variable an rscript reads to this allowlist.
 env_prefix=""
-for var in APT_PROXY DEFAULT_PROXY SSHKEYS; do
+for var in APT_PROXY DEFAULT_PROXY SSHKEYS MAINT_USER MAINT_SSHKEYS; do
     if [[ -n "${!var-}" ]]; then
         env_prefix+=" $var=$(printf '%q' "${!var}")"
     fi

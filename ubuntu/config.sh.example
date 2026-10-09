@@ -20,3 +20,14 @@ DEFAULT_PROXY=
 # single key per line
 SSHKEYS="
 "
+
+# --- Maintenance user (rscripts/om-user.bash) ---------------------------------
+# Single sudo user that om-user.bash creates on every target host. When
+# MAINT_SSHKEYS is empty the payload falls back to SSHKEYS above, so the
+# maintenance account simply gets the same keys as the operator account.
+MAINT_USER="maintainer"
+
+# Multi-line public key lines for $MAINT_USER/.ssh/authorized_keys. Leave empty
+# to reuse SSHKEYS. single key per line
+MAINT_SSHKEYS="
+"
