@@ -3,10 +3,10 @@
 # $MAINT_SSHKEYS key lines — falling back to $SSHKEYS — to that new user's
 # ~/.ssh/authorized_keys.
 #
-# Idempotent: an existing user is kept and duplicate key lines are skipped, so
-# re-running against a host is a no-op. Requires the connecting operator account
-# to have non-interactive sudo.
-set -eu
+# Idempotent: an existing user is kept, duplicate key lines are skipped, and
+# existing duplicate key lines are removed. Requires the connecting operator
+# account to have non-interactive sudo.
+set -euo pipefail
 
 om_die() {
     echo "om-user.bash: $*" >&2
@@ -53,6 +53,18 @@ auth_keys="$ssh_dir/authorized_keys"
 sudo -n install -d -m 700 -o "$user" -g "$user" "$ssh_dir"
 sudo -n touch "$auth_keys"
 
+deduplicate() {
+    local file="$1"
+    local tmp
+    tmp="$(sudo -n mktemp "${file}.XXXXXX")"
+    if sudo -n awk '!seen[$0]++' "$file" | sudo -n tee "$tmp" >/dev/null; then
+        sudo -n mv "$tmp" "$file"
+    else
+        sudo -n rm -f "$tmp"
+        return 1
+    fi
+}
+
 added=0
 while IFS= read -r line; do
     if [[ -z "${line//[$' \t\r']/}" ]]; then
@@ -65,6 +77,7 @@ while IFS= read -r line; do
     added=$((added + 1))
 done <<< "$keys"
 
+deduplicate "$auth_keys"
 sudo -n chmod 600 "$auth_keys"
 sudo -n chown "$user:$user" "$auth_keys"
 echo "om-user.bash: $user ready, $added new key(s) added to $auth_keys"

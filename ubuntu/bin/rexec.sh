@@ -33,12 +33,13 @@ for var in APT_PROXY DEFAULT_PROXY SSHKEYS MAINT_USER MAINT_SSHKEYS; do
 done
 
 run_on_host() {
+    echo $1
     ssh "$1" "$env_prefix bash -s" < "$command_file"
 }
 
 if [[ -f "$host" ]]; then
-    while IFS= read -r h; do
-        if [[ -z "${h//[$' \t\r']}/" ]]; then
+    while IFS= read -r h || [[ -n "$h" ]]; do
+        if [[ -z "${h//[$' \t\r']/}" ]]; then
             continue
         fi
         if [[ "$h" == \#* ]]; then

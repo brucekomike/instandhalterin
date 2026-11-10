@@ -61,7 +61,8 @@ bin/rexec.sh <host-list-file> <rscript>
 - Every variable defined in `config.sh` (`REMOTE_PROXY_IP`, `SNAP_PROXY_IP`,
   `SSHKEYS`, …) is exported to the remote shell, so rscripts can use them.
 - If the first argument is an existing file, it is treated as a host list
-  (`rhosts/*.txt`); blank lines and `#` comments are skipped.
+  (`rhosts/*.txt`); blank lines and `#` comments are skipped. The last line
+  does not need a trailing newline.
 
 Examples:
 
