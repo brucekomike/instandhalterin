@@ -27,6 +27,7 @@ ubuntu/
 │   ├── k8strap.bash       # install the k8s snap through the local proxy
 │   ├── addkey.bash        # append $SSHKEYS to the operator's authorized_keys
 │   ├── om-user.bash       # create $MAINT_USER with sudo + its own keys
+│   ├── nisudo.bash          # grant the connecting user NOPASSWD sudo
 │   ├── dialog.bash        # dialog connection test
 │   └── reboot.bash        # reboot the remote host
 ├── rcommands/            # one-off remote commands (no env setup)
@@ -82,6 +83,9 @@ bin/rexec.sh rhosts/list1.txt rscripts/addkey.bash
 # Create the sudo maintenance user on every worker (idempotent)
 bin/rexec.sh rhosts/list1.txt rscripts/om-user.bash
 
+# Give the connecting user passwordless sudo (run interactively when prompted)
+bin/riexec.sh <host|host-list-file> rscripts/nisudo.bash
+
 # Reboot after strapping
 bin/rexec.sh rhosts/list1.txt rscripts/reboot.bash
 ```
@@ -89,12 +93,23 @@ bin/rexec.sh rhosts/list1.txt rscripts/reboot.bash
 Typical fresh-host bring-up order: proxy → apt → snapstrap → k8strap →
 addkey → om-user → reboot.
 
+`nisudo.bash` skips users that already have a `NOPASSWD`
+sudo rule. Otherwise, the connecting user must already be allowed to use
+`sudo`; run it with a terminal (`ssh -t`) if sudo needs a password prompt.
+It grants `NOPASSWD:ALL` through a validated `/etc/sudoers.d/` drop-in and
+will not overwrite an existing file at that path.
+
 ## Interactive helpers
 
 ```bash
-bin/riexec.sh <host> [<ssh-args...>]      # interactive ssh to one host
+bin/riexec.sh <host|host-list-file> <rscript> [<script-args...>] # run payload with a TTY
+bin/riexec.sh <host> [<ssh-args...>]      # interactive ssh passthrough
 bin/test_tui.sh <host>                    # dialog/ncurses smoke test on remote
 ```
+
+In script mode, `riexec.sh` stages the payload before opening the TTY, so
+interactive commands such as `sudo` can prompt for a password. Host-list
+entries run sequentially and may each require interaction.
 
 ## Configuration (config.sh)
 
@@ -107,7 +122,7 @@ bin/test_tui.sh <host>                    # dialog/ncurses smoke test on remote
 | `MAINT_USER`              | `rscripts/om-user.bash` (user to create; default `maintainer`) |
 | `MAINT_SSHKEYS`           | `rscripts/om-user.bash` (keys for that user; falls back to `SSHKEYS`) |
 
-Only the variables listed in `bin/rexec.sh`'s allowlist (`APT_PROXY`,
+Only the variables listed in the remote-execution scripts' allowlists (`APT_PROXY`,
 `DEFAULT_PROXY`, `SSHKEYS`, `MAINT_USER`, `MAINT_SSHKEYS`) are exported to the
 remote shell — when an rscript reads a new `config.sh` variable, add it there
 too, otherwise it arrives empty.
