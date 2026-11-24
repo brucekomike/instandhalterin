@@ -1,0 +1,6 @@
+# Site-specific literal patterns are kept OUT of git: hardcoding one fleet's
+# alias prefixes into this public repo would itself be the leak
+# no-host-identifiers_test.sh exists to catch. The test reads this file only if
+# it exists, so a fresh clone still gets the generic shape rules and a real
+# control host additionally gets the fleet-aware ones.
+host-identifiers.local
