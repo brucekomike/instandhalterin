@@ -1,3 +1,9 @@
 # Ignore host lists (may contain sensitive hostnames); keep this file
 *.txt
 *
+# ...but the role-named templates ARE the committed contract: they show the shape
+# of a group file with synthetic aliases and never name a real host. Putting a
+# real list here is the defect the pre-push gate now catches automatically --
+# see tests/no-host-identifiers_test.sh and bin/inventory-rgroups.sh, which
+# refuses to write a tracked path.
+!*.example

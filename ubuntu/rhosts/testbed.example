@@ -1,0 +1,27 @@
+# Template for the isolated testbed group. Copy to <group>.txt using the exact
+# group= value from your inventory. See compute.example for the gitignore rule.
+
+# NAME THIS FILE FOR THE TARGET ROLE, NEVER FOR THE CONSOLE LABEL.
+#
+# Cloud object names drift independently: a VPC rename may be API-able while the
+# matching subnet and NAT gateway updates are console-only, so an estate in a
+# MIXED naming state is normal and expected. Group files key on SSH aliases, and
+# aliases are built from port + IP, so a cloud rename cannot break them. Terraform
+# is likewise unaffected when it references networks by ID rather than by name --
+# verify that in your own stack before assuming it.
+#
+# Do not "fix" the stale labels by guessing. Describe the mixed state plainly and
+# list each place the old string appears, sorted into:
+#   (a) safe to change now      -- prose describing the network as it is today
+#   (b) must wait for the rename -- consumers that resolve the name at runtime
+#   (c) historical, keep         -- dated results, finished reports, log paths
+# Beware a substring that merely LOOKS like the old label (a domain, a job name):
+# sweeping on the short word rewrites the wrong strings. Sweep on the full
+# object tokens instead.
+
+cluster-testbed-server-1
+cluster-testbed-server-2
+cluster-testbed-agent-1
+
+# Single-node canary used for create/destroy experiments on the same entry.
+canary-alias

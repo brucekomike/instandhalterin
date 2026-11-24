@@ -1,0 +1,28 @@
+# Template for the compute group. Copy to <group>.txt where <group> is exactly the
+# value of group= in your inventory records, and replace every placeholder with a
+# real SSH alias.
+#
+# The real lists are gitignored -- see rhosts/.gitignore ("may contain sensitive
+# hostnames") and docs/host-inventory-unification.md. This repo is PUBLIC and ships
+# the SHAPE of a fleet; the site inventory of record stays private. Generate the
+# real file rather than typing it:
+#
+#     FLEET_INVENTORY=/path/to/private bin/inventory-rgroups.sh
+#     FLEET_INVENTORY=/path/to/private bin/inventory-rgroups.sh --check   # drift gate
+#
+# rexec.sh feeds each non-comment line to ssh verbatim and cannot strip a trailing
+# comment, so per-host notes belong on their own lines ABOVE the alias.
+
+# Reached through the group's jump alias. The jump is the sole entry for every
+# host below it: one bad write there costs the group, not one host.
+worker-alias-01
+worker-alias-02
+worker-alias-03
+worker-role-cache
+worker-role-ci-runner
+
+# login_user=root here, so the held-host procedure applies: one host at a time,
+# keep a session open, and prove the new key authenticates from a SECOND
+# connection before closing anything.
+base-alias-app-01
+base-alias-app-02

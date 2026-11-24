@@ -1,0 +1,27 @@
+# Template for the applications/services group. Copy to <group>.txt using the
+# exact group= value from your inventory. See compute.example for why the real
+# list is gitignored and how to generate it.
+
+# The entry alias is ALSO the ProxyJump for the members below, so it is applied
+# first and verified from a second connection before its dependents.
+entry-alias
+
+base-alias-01
+base-alias-02
+base-alias-03
+role-alias-mirror
+
+# Cluster nodes reached by distinct DNAT ports on the same entry EIP.
+#
+# GROUP BY ENTRY NAT, NOT BY CLUSTER LABEL. This is the rule that resolves the
+# recurring confusion: a cluster belongs to the group whose entry NAT it is
+# reached THROUGH, even when its own name suggests a different network.
+cluster-role-server-1
+cluster-role-server-2
+cluster-role-agent-1
+
+# Database hosts for one service, reached only by ProxyJump through a cluster
+# node above. They belong to THIS group because of that route, even though they
+# were provisioned alongside a different network and look like they belong there.
+datastore-role-primary
+datastore-role-standby
