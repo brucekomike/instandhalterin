@@ -4,8 +4,11 @@ set -euo pipefail
 usage() {
     cat >&2 <<'EOF'
 usage:
-  riexec.sh <host|host-list-file> <rscript> [script-args...]
+  riexec.sh <host|host-list-file|@group> <rscript> [script-args...]
   riexec.sh <host> [ssh-args...]
+
+@group resolves hosts from backup-scripts conf/<group>/ file names
+(BACKUP_CONF in config.sh); a bare name is a single ssh alias.
 EOF
     exit 2
 }
@@ -42,6 +45,15 @@ if [[ $# -ge 2 && -f "$2" ]]; then
     trap 'rmdir "$tmp_dir" 2>/dev/null || true' EXIT
     remote_script="/tmp/instandhalterin-riexec-${tmp_dir##*/}.bash"
 
+    # Resolve @group / conf-group-dir into a host list file (shared membership
+    # with backup-scripts: the conf filename IS the ssh target).
+    if [[ "$host_arg" == @* || -d "$host_arg" ]]; then
+        resolved_list="$(mktemp)"
+        trap 'rm -f "$resolved_list"; rmdir "$tmp_dir" 2>/dev/null || true' EXIT
+        "$here/bin/backup-hosts.sh" "${host_arg#@}" > "$resolved_list"
+        host_arg="$resolved_list"
+    fi
+
     run_script_on_host() {
         local remote_host="$1"
         echo "$remote_host"
@@ -63,6 +75,10 @@ if [[ $# -ge 2 && -f "$2" ]]; then
 fi
 
 # Preserve the original interactive SSH passthrough mode.
+if [[ "$host_arg" == @* ]]; then
+    echo "riexec.sh: @group needs a script to run; passthrough mode takes a single host" >&2
+    exit 2
+fi
 remote_host="$host_arg"
 shift
 echo "ssh -t $remote_host $*"

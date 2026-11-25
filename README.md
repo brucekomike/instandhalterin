@@ -17,6 +17,7 @@ ubuntu/
 ├── bin/                  # local driver scripts (run on the control host)
 │   ├── configstrap.sh    # create config.sh from the example
 │   ├── rexec.sh          # run an rscript on a remote host (or host list)
+│   ├── backup-hosts.sh   # resolve host names from a backup-scripts conf/ tree
 │   ├── addkey.sh         # append config.sh's SSH keys to local authorized_keys
 │   ├── riexec.sh         # open an interactive ssh session to one host
 │   └── test_tui.sh       # verify dialog/ncurses works on a remote host
@@ -57,6 +58,7 @@ bin/addkey.sh                        # keys from config.sh -> local ~/.ssh/autho
 ```bash
 bin/rexec.sh <host>           <rscript>
 bin/rexec.sh <host-list-file> <rscript>
+bin/rexec.sh @<group>         <rscript>   # hosts from backup-scripts conf/<group>/
 ```
 
 - Every variable defined in `config.sh` (`REMOTE_PROXY_IP`, `SNAP_PROXY_IP`,
@@ -64,6 +66,15 @@ bin/rexec.sh <host-list-file> <rscript>
 - If the first argument is an existing file, it is treated as a host list
   (`rhosts/*.txt`); blank lines and `#` comments are skipped. The last line
   does not need a trailing newline.
+- `@<group>` (or a conf group directory) resolves its hosts from the
+  backup-scripts `conf/<group>/*.conf` **file names** — the backup tool's rule
+  that the filename IS the ssh target makes its scope a host list this tool
+  can read. One membership source for deployment runs and backups; no second
+  list to keep aligned. `BACKUP_CONF` in `config.sh` points at that `conf/`
+  directory. `*.conf.disabled` hosts are reported as comments, never executed.
+  The `@` marker is required because a group name can collide with a host
+  alias; a bare name always stays a single host. `riexec.sh` accepts `@group`
+  in script mode the same way.
 
 Examples:
 

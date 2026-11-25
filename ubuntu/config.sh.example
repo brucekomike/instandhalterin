@@ -31,3 +31,10 @@ MAINT_USER="maintainer"
 # to reuse SSHKEYS. single key per line
 MAINT_SSHKEYS="
 "
+
+# --- Backup-scripts conf directory (shared host membership) -------------------
+# Path to the backup-scripts conf/ directory of THIS fleet. bin/backup-hosts.sh
+# reads host names from the per-host conf file names there (filename IS the ssh
+# target), and rexec/riexec resolve @group targets from it — so fleet runs and
+# backup scope share one membership list. Leave empty to disable @group.
+BACKUP_CONF=""

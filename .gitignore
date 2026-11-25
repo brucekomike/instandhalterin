@@ -1,2 +1,5 @@
 **/.DS_Store
 **/tmp
+# Dated backups of gitignored site files (config.sh, host-identifiers.local, rhosts lists)
+# are site data too. install.sh creates them next to the live file; never track them.
+*.bak-*

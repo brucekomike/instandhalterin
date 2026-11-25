@@ -3,8 +3,15 @@
 # rexec.sh — run a non-interactive script on a remote host (or every host in a list).
 #
 # Usage:
-#   rexec.sh <host> <command-file>
+#   rexec.sh <host> <command-file>          single ssh alias
 #   rexec.sh <host-list-file> <command-file>
+#   rexec.sh @<group> <command-file>        hosts from backup-scripts conf/<group>/
+#   rexec.sh <conf-group-dir> <command-file>
+#
+# @group membership is read from the backup-scripts conf file names (filename
+# IS the ssh target), so fleet runs and backup scope share one host list.
+# The @ marker is required: group names can collide with host aliases.
+# BACKUP_CONF (config.sh) points at the backup-scripts conf/ directory.
 #
 # Every variable defined in config.sh (e.g. $REMOTE_PROXY_IP, $SSHKEYS) is
 # exported to the remote shell, so the remote script can use the project
@@ -18,8 +25,18 @@ echo $here
 # shellcheck disable=SC1090
 . "$here/config.sh"
 
-host="${1:?usage: rexec.sh <host|host-list-file> <command-file>}"
-command_file="${2:?usage: rexec.sh <host|host-list-file> <command-file>}"
+host="${1:?usage: rexec.sh <host|host-list-file|@group> <command-file>}"
+command_file="${2:?usage: rexec.sh <host|host-list-file|@group> <command-file>}"
+
+# Resolve @group / conf-group-dir into a host list file. A bare name stays a
+# single ssh alias; a plain file stays a list file (both unchanged).
+resolved_list=""
+if [[ "$host" == @* || -d "$host" ]]; then
+    resolved_list="$(mktemp)"
+    trap 'rm -f "$resolved_list"' EXIT
+    "$here/bin/backup-hosts.sh" "${host#@}" > "$resolved_list"
+    host="$resolved_list"
+fi
 
 # Build the remote environment prefix, quoting each value for the remote shell.
 # Variables that are missing or empty in config.sh are skipped.

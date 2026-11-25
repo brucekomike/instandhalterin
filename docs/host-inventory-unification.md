@@ -1,7 +1,11 @@
 # One host inventory: unifying the inventories that describe the same fleet
 
-Status: **proposal.** Written after a read-only census of every SSH alias in use, followed by
-an append-only key run and a drift report.
+Status: **proposal, partially superseded.** Written after a read-only census of every SSH alias in
+use, followed by an append-only key run and a drift report. Owner decision 2026-11-25: membership is
+shared by reading the backup tool's per-host conf file names directly (`bin/backup-hosts.sh`,
+`@group` in rexec/riexec) instead of building a separate registry; the per-host record registry
+below remains the reference design for the checks that direct reading does not cover (reverse
+coverage, key convergence, login_user policy).
 
 **This document carries no site data on purpose.** This repository is public and ships the
 *shape* of a fleet; the addresses, alias names and instance identifiers of a real deployment
