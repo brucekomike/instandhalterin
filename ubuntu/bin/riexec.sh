@@ -27,12 +27,14 @@ if [[ $# -ge 2 && -f "$2" ]]; then
     done
 
     here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-    [[ -f "$here/config.sh" ]] || {
-        echo "riexec.sh: missing $here/config.sh; run bin/configstrap.sh first" >&2
+    cfg="${IH_CONFIG:-$here/../../.config/ihconfig}"
+    [[ -d "$cfg" ]] || cfg="$here"
+    [[ -f "$cfg/config.sh" ]] || {
+        echo "riexec.sh: missing $cfg/config.sh; run bin/configstrap.sh first" >&2
         exit 1
     }
     # shellcheck disable=SC1090
-    . "$here/config.sh"
+    . "$cfg/config.sh"
 
     env_prefix=""
     for var in APT_PROXY DEFAULT_PROXY SSHKEYS MAINT_USER MAINT_SSHKEYS; do

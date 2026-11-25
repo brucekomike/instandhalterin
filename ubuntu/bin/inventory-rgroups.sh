@@ -24,9 +24,11 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cfg="${IH_CONFIG:-$here/../../.config/ihconfig}"
+[[ -d "$cfg" ]] || cfg="$here"
 inventory="${FLEET_INVENTORY:-$HOME/.config/instandhalterin/fleet}"
 hosts_dir="$inventory/hosts.d"
-out_dir="$here/rhosts"
+out_dir="$cfg/rhosts"
 mode="${1:-write}"
 
 [[ -d "$hosts_dir" ]] || {

@@ -80,4 +80,21 @@ if bash "$tmp/project/bin/riexec.sh" @alpha -L 2>/dev/null; then
     echo "FAIL: passthrough mode must refuse @group"; exit 1
 fi
 
+# --- external config dir: <checkout>/../.config/ihconfig -----------------------
+# Two instances of the tool read two fleets' configs from one config repo:
+# the config dir sits BESIDE the checkout, not inside it.
+mkdir -p "$tmp/ctx/instandhalterin/ubuntu/bin" "$tmp/ctx/.config/ihconfig"
+cp "$root/bin/backup-hosts.sh" "$root/bin/rexec.sh" "$tmp/ctx/instandhalterin/ubuntu/bin/"
+printf 'BACKUP_CONF="%s"\n' "$tmp/conf" > "$tmp/ctx/.config/ihconfig/config.sh"
+: > "$COMMAND_LOG"
+bash "$tmp/ctx/instandhalterin/ubuntu/bin/rexec.sh" @beta "$tmp/payload.bash"
+grep -F '<host-d>' "$COMMAND_LOG" >/dev/null
+
+# IH_CONFIG overrides the sibling lookup (a second fleet, a second folder).
+mkdir -p "$tmp/other-config"
+printf 'BACKUP_CONF="%s"\n' "$tmp/conf" > "$tmp/other-config/config.sh"
+: > "$COMMAND_LOG"
+IH_CONFIG="$tmp/other-config" bash "$tmp/ctx/instandhalterin/ubuntu/bin/rexec.sh" @beta "$tmp/payload.bash"
+grep -F '<host-d>' "$COMMAND_LOG" >/dev/null
+
 echo "backup-hosts tests passed"

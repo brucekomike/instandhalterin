@@ -21,8 +21,10 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cfg="${IH_CONFIG:-$here/../../.config/ihconfig}"
+[[ -d "$cfg" ]] || cfg="$here"
 # shellcheck disable=SC1090
-[[ -f "$here/config.sh" ]] && . "$here/config.sh"
+[[ -f "$cfg/config.sh" ]] && . "$cfg/config.sh"
 
 conf="${BACKUP_CONF:-}"
 [[ -n "$conf" && -d "$conf" ]] || {

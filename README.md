@@ -51,6 +51,20 @@ bin/configstrap.sh
 bin/addkey.sh                        # keys from config.sh -> local ~/.ssh/authorized_keys
 ```
 
+### Where the configuration lives
+
+Each checkout reads its config dir in this order:
+
+1. `$IH_CONFIG` (explicit override),
+2. `.config/ihconfig` **beside the checkout** (`<checkout>/../.config/ihconfig`),
+3. legacy: files installed inside `ubuntu/` itself.
+
+The config dir holds `config.sh`, `rhosts/*.txt` and `tests/host-identifiers.local`.
+It is normally a symlink into a private per-fleet config repo, so one tool repo
+serves several fleets: each checkout's `ihconfig` link selects that fleet's
+folder, and `readlink` shows which one. The public repo never carries the config
+itself — only `config.sh.example` and the `rhosts/*.example` shapes.
+
 ## Running scripts remotely
 
 `rexec.sh` ships an rscript to a remote host and executes it:

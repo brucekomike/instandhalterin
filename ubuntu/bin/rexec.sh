@@ -21,9 +21,14 @@ set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 echo $here
+# Config dir: $IH_CONFIG, else .config/ihconfig beside the checkout, else the
+# legacy in-tree layout. One config repo, one folder per fleet: each checkout
+# reads its own fleet's config through its own ihconfig link.
+cfg="${IH_CONFIG:-$here/../../.config/ihconfig}"
+[[ -d "$cfg" ]] || cfg="$here"
 # Make the project configuration available to the script run remotely.
 # shellcheck disable=SC1090
-. "$here/config.sh"
+. "$cfg/config.sh"
 
 host="${1:?usage: rexec.sh <host|host-list-file|@group> <command-file>}"
 command_file="${2:?usage: rexec.sh <host|host-list-file|@group> <command-file>}"

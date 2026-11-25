@@ -5,17 +5,19 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cfg="${IH_CONFIG:-$here/../../.config/ihconfig}"
+[[ -d "$cfg" ]] || cfg="$here"
 
-if [[ ! -f "$here/config.sh" ]]; then
-    echo "addkey.sh: $here/config.sh not found; run bin/configstrap.sh first" >&2
+if [[ ! -f "$cfg/config.sh" ]]; then
+    echo "addkey.sh: $cfg/config.sh not found; run bin/configstrap.sh first" >&2
     exit 1
 fi
 
 # shellcheck disable=SC1090
-. "$here/config.sh"
+. "$cfg/config.sh"
 
 if [[ -z "${SSHKEYS:-}" ]]; then
-    echo "addkey.sh: SSHKEYS is empty in $here/config.sh" >&2
+    echo "addkey.sh: SSHKEYS is empty in $cfg/config.sh" >&2
     exit 1
 fi
 

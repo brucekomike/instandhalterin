@@ -7,10 +7,13 @@
 set -euo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cfg="${IH_CONFIG:-$here/../../.config/ihconfig}"
+[[ -d "$cfg" ]] || cfg="$here"
 src="$here/config.sh.example"
-dst="$here/config.sh"
+dst="$cfg/config.sh"
 
 if [[ ! -f "$dst" ]]; then
+    mkdir -p "$cfg"
     cp "$src" "$dst"
     echo "Created $dst from config.sh.example"
 else

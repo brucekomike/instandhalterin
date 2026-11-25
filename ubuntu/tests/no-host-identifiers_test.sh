@@ -116,8 +116,10 @@ if [[ -n "$tracked" ]]; then
 fi
 
 # --- site-specific literals, from the gitignored extras ----------------------
-local_rules="$repo/ubuntu/tests/host-identifiers.local"
-if [[ -f "$local_rules" ]]; then
+# Fleet rules live in the config dir (external ihconfig) or, legacy, in-tree.
+cfg="${IH_CONFIG:-$repo/../.config/ihconfig}"
+for local_rules in "$root/tests/host-identifiers.local" "$cfg/tests/host-identifiers.local"; do
+    [[ -f "$local_rules" ]] || continue
     while IFS= read -r pat; do
         [[ -z "$pat" || "$pat" == \#* ]] && continue
         hits="$(cd "$repo" && grep -rnE -- "$pat" --exclude=host-identifiers.local $(git ls-files) 2>/dev/null | head -20 || true)"
@@ -127,7 +129,7 @@ if [[ -f "$local_rules" ]]; then
             echo "    ${h#*:}" >&2
         done <<<"$hits"
     done < <(grep -vE '^[[:space:]]*$' "$local_rules")
-fi
+done
 
 if [[ "$violations" -gt 0 ]]; then
     echo >&2
